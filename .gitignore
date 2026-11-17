@@ -221,3 +221,24 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- Project-specific ---
+# Environment files (keep .env.example tracked)
+.env.*
+!.env.example
+
+# Data files
+*.csv
+*.parquet
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
