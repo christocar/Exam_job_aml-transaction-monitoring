@@ -1,0 +1,23 @@
+name: "aml_transaction_monitoring"
+version: "1.0.0"
+profile: "aml_transaction_monitoring"
+
+model-paths: ["models"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  aml_transaction_monitoring:
+    staging:
+      +schema: staging
+      +materialized: view
+    intermediate:
+      +schema: intermediate
+      +materialized: table
+    marts:
+      +schema: marts
+      +materialized: table

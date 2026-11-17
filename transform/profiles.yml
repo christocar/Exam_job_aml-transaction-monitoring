@@ -1,0 +1,12 @@
+aml_transaction_monitoring:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: aml-monitoring-christocar
+      dataset: aml
+      location: EU
+      threads: 4
+      job_execution_timeout_seconds: 300
+      priority: interactive
