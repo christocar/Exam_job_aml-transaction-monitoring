@@ -1,0 +1,14 @@
+version: 2
+
+sources:
+  - name: aml_raw
+    database: aml-monitoring-christocar
+    schema: aml_raw
+    description: "Raw AML source data loaded with BigQuery load jobs. All columns are STRING."
+    tables:
+      - name: transactions
+        description: "Raw transactions from HI-Small_Trans.csv"
+      - name: accounts
+        description: "Raw accounts from HI-Small_accounts.csv"
+      - name: patterns
+        description: "Parsed laundering patterns from HI-Small_Patterns.txt"
