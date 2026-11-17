@@ -4,4 +4,6 @@ version = "0.1.0"
 description = "End-to-end data platform for detecting suspicious money-laundering patterns in bank transactions."
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "google-cloud-bigquery>=3.47.0",
+]
