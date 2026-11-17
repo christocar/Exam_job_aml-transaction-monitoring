@@ -102,3 +102,19 @@ This log records key technical decisions, why they were made, and their conseque
 **Consequences:**
 - No secrets in the repo.
 - CI/CD and orchestration will use a dedicated service account, set up later with Terraform.
+
+
+---
+
+## 008 – dbt Core v1.12 instead of dbt v2
+
+**Date:** 2026-11-17
+
+**Context:** dbt v2 (Rust-based engine) reached general availability in September 2026 and is now the default for new installations. dbt Core v1 (Python-based) remains supported with security and compatibility patches.
+
+**Decision:** Use dbt Core v1.12 with the `dbt-bigquery` adapter.
+
+**Consequences:**
+- Mature, well-documented tooling with broad community knowledge and integrations (e.g. Dagster), which reduces risk within the project timeline.
+- Fully open source (Apache 2.0).
+- The project is written without deprecation warnings so it can be upgraded to dbt v2 later. The upgrade is listed as a possible extension.
