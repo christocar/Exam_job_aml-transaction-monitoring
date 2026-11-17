@@ -5,5 +5,6 @@ description = "End-to-end data platform for detecting suspicious money-launderin
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "dbt-bigquery>=1.12.4",
     "google-cloud-bigquery>=3.47.0",
 ]
