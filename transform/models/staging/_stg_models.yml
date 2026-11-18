@@ -1,0 +1,54 @@
+version: 2
+
+models:
+  - name: stg_transactions
+    description: "Typed and renamed transactions. One row per transaction from the raw source."
+    columns:
+      - name: transaction_at
+        description: "Date and time of the transaction. Source has no time zone, so stored as DATETIME."
+        data_tests:
+          - not_null
+      - name: from_bank_id
+        description: "ID of the sending bank. Kept as STRING to preserve leading zeros."
+        data_tests:
+          - not_null
+      - name: from_account_id
+        description: "ID of the sending account."
+        data_tests:
+          - not_null
+      - name: to_bank_id
+        description: "ID of the receiving bank. Kept as STRING to preserve leading zeros."
+        data_tests:
+          - not_null
+      - name: to_account_id
+        description: "ID of the receiving account."
+        data_tests:
+          - not_null
+      - name: amount_received
+        description: "Amount received, in receiving_currency."
+        data_tests:
+          - not_null
+      - name: receiving_currency
+        description: "Currency of the received amount."
+        data_tests:
+          - not_null
+      - name: amount_paid
+        description: "Amount paid, in payment_currency."
+        data_tests:
+          - not_null
+      - name: payment_currency
+        description: "Currency of the paid amount."
+        data_tests:
+          - not_null
+      - name: payment_format
+        description: "Payment method, e.g. ACH, Wire, Cheque."
+        data_tests:
+          - not_null
+      - name: is_laundering
+        description: "Label from the source: true if the transaction is part of money laundering."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
