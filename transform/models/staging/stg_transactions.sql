@@ -24,6 +24,24 @@ renamed as (
 
     from source
 
+),
+
+hashed as (
+
+    select
+        to_hex(md5(to_json_string(renamed))) as row_hash,
+        *
+    from renamed
+
 )
 
-select * from renamed
+select
+    concat(
+        row_hash,
+        '-',
+        cast(row_number() over (partition by row_hash order by row_hash) as string)
+    )                                              as transaction_id,
+    * except (row_hash),
+    count(*) over (partition by row_hash) > 1      as is_exact_duplicate
+
+from hashed

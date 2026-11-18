@@ -2,8 +2,17 @@ version: 2
 
 models:
   - name: stg_transactions
-    description: "Typed and renamed transactions. One row per transaction from the raw source."
+    description: >
+      Typed and renamed transactions. One row per transaction from the raw source.
+      No rows are removed. Exact duplicates are flagged, not dropped.
     columns:
+      - name: transaction_id
+        description: >
+          Deterministic surrogate key: MD5 hash of all columns plus an occurrence number.
+          Identical rows get suffixes -1, -2. Stable across rebuilds.
+        data_tests:
+          - not_null
+          - unique
       - name: transaction_at
         description: "Date and time of the transaction. Source has no time zone, so stored as DATETIME."
         data_tests:
@@ -32,6 +41,24 @@ models:
         description: "Currency of the received amount."
         data_tests:
           - not_null
+          - accepted_values:
+              arguments:
+                values: &currencies
+                  - US Dollar
+                  - Euro
+                  - Swiss Franc
+                  - Yuan
+                  - Shekel
+                  - Rupee
+                  - UK Pound
+                  - Ruble
+                  - Yen
+                  - Bitcoin
+                  - Canadian Dollar
+                  - Australian Dollar
+                  - Mexican Peso
+                  - Saudi Riyal
+                  - Brazil Real
       - name: amount_paid
         description: "Amount paid, in payment_currency."
         data_tests:
@@ -40,10 +67,23 @@ models:
         description: "Currency of the paid amount."
         data_tests:
           - not_null
+          - accepted_values:
+              arguments:
+                values: *currencies
       - name: payment_format
-        description: "Payment method, e.g. ACH, Wire, Cheque."
+        description: "Payment method."
         data_tests:
           - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - Cheque
+                  - Credit Card
+                  - ACH
+                  - Cash
+                  - Reinvestment
+                  - Wire
+                  - Bitcoin
       - name: is_laundering
         description: "Label from the source: true if the transaction is part of money laundering."
         data_tests:
@@ -52,3 +92,9 @@ models:
               arguments:
                 values: [true, false]
                 quote: false
+      - name: is_exact_duplicate
+        description: >
+          True if the row is identical to another row in every column.
+          18 rows (9 pairs) in HI-Small, all small Bitcoin/ACH wallet transactions, none labelled as laundering.
+        data_tests:
+          - not_null

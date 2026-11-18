@@ -118,3 +118,23 @@ This log records key technical decisions, why they were made, and their conseque
 - Mature, well-documented tooling with broad community knowledge and integrations (e.g. Dagster), which reduces risk within the project timeline.
 - Fully open source (Apache 2.0).
 - The project is written without deprecation warnings so it can be upgraded to dbt v2 later. The upgrade is listed as a possible extension.
+
+
+
+---
+
+## 009 – Exact duplicates are flagged, not removed
+
+**Date:** 2026-11-18
+
+**Context:** The source has no transaction ID. Exploration showed 18 rows (9 pairs) that are identical in every column. All are small ACH and Bitcoin amounts from wallet-like accounts (IDs ending in `1` sending to near-identical IDs ending in `0`), and none are labelled as laundering. The pattern suggests an artefact of the IBM data generator rather than real double bookings.
+
+**Decision:**
+- Keep all rows. Add `is_exact_duplicate` to flag them.
+- Add a deterministic `transaction_id`: MD5 hash of all columns plus an occurrence number (`-1`, `-2`).
+
+**Consequences:**
+- No data is silently lost, in line with banking practice where a removed row could hide an alert.
+- Every transaction can be referenced by a stable ID across rebuilds, which alerts and investigations require.
+- Downstream models can choose to exclude flagged duplicates explicitly and visibly.
+- Uniqueness is verified with a dbt `unique` test.
