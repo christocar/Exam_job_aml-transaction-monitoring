@@ -138,3 +138,26 @@ This log records key technical decisions, why they were made, and their conseque
 - Every transaction can be referenced by a stable ID across rebuilds, which alerts and investigations require.
 - Downstream models can choose to exclude flagged duplicates explicitly and visibly.
 - Uniqueness is verified with a dbt `unique` test.
+
+
+
+---
+
+## 010 – Normalized bank IDs and a composite account key
+
+**Date:** 2026-11-21
+
+**Context:** Two findings during staging of the accounts data:
+- Account numbers are only unique within a bank. 8 account numbers exist at two different banks, with different owners.
+- Bank IDs are written differently in the two source files. Transactions use leading zeros (`010`), accounts do not (`10`). Matching on bank ID as written joined 0 of 5,078,345 transactions to an account. Matching without leading zeros joined all 5,078,345.
+
+**Decision:**
+- Normalize bank IDs in the staging layer by casting to integer and back to string. The raw layer keeps the original values (decision 005).
+- Identify accounts with a composite key `account_key = bank_id|account_id`. Transactions get `from_account_key` and `to_account_key`.
+- Add dbt `relationships` tests so every transaction must reference an existing account.
+
+**Consequences:**
+- Transactions and accounts can be joined reliably, with full coverage verified by tests.
+- Accounts are never mixed up with another bank's account that has the same number, which could otherwise flag the wrong account holder.
+- A bank ID that is not numeric becomes NULL and is caught by the `not_null` test.
+- `transaction_id` values changed once, since the hash is computed on the normalized columns. They remain deterministic across rebuilds.

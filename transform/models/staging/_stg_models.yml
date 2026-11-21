@@ -18,19 +18,23 @@ models:
         data_tests:
           - not_null
       - name: from_bank_id
-        description: "ID of the sending bank. Kept as STRING to preserve leading zeros."
+        description: >
+          ID of the sending bank, normalized without leading zeros (e.g. '010' -> '10')
+          so it matches bank_id in stg_accounts. The raw layer keeps the original value.
         data_tests:
           - not_null
       - name: from_account_id
-        description: "ID of the sending account."
+        description: "Account number of the sending account. Unique only within a bank."
         data_tests:
           - not_null
       - name: to_bank_id
-        description: "ID of the receiving bank. Kept as STRING to preserve leading zeros."
+        description: >
+          ID of the receiving bank, normalized without leading zeros
+          so it matches bank_id in stg_accounts.
         data_tests:
           - not_null
       - name: to_account_id
-        description: "ID of the receiving account."
+        description: "Account number of the receiving account. Unique only within a bank."
         data_tests:
           - not_null
       - name: amount_received
@@ -92,9 +96,60 @@ models:
               arguments:
                 values: [true, false]
                 quote: false
+      - name: from_account_key
+        description: "Key of the sending account: from_bank_id|from_account_id. Joins to stg_accounts.account_key."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_accounts')
+                field: account_key
+      - name: to_account_key
+        description: "Key of the receiving account: to_bank_id|to_account_id. Joins to stg_accounts.account_key."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_accounts')
+                field: account_key
       - name: is_exact_duplicate
         description: >
           True if the row is identical to another row in every column.
           18 rows (9 pairs) in HI-Small, all small Bitcoin/ACH wallet transactions, none labelled as laundering.
+        data_tests:
+          - not_null
+
+  - name: stg_accounts
+    description: "Cleaned and renamed accounts. One row per account (bank + account number)."
+    columns:
+      - name: account_key
+        description: >
+          Unique account key: bank_id|account_id. Account numbers are only unique within a bank;
+          8 account numbers exist at two different banks with different owners.
+        data_tests:
+          - not_null
+          - unique
+      - name: account_id
+        description: "Account number. Unique only within a bank."
+        data_tests:
+          - not_null
+      - name: bank_id
+        description: "ID of the bank holding the account, normalized without leading zeros."
+        data_tests:
+          - not_null
+      - name: bank_name
+        description: "Name of the bank."
+        data_tests:
+          - not_null
+      - name: entity_id
+        description: "ID of the account holder. One entity can own several accounts."
+        data_tests:
+          - not_null
+      - name: entity_name
+        description: "Name of the account holder, e.g. 'Corporation #33520'. Synthetic but treated as personal data."
+        data_tests:
+          - not_null
+      - name: entity_type
+        description: "Type of account holder extracted from entity_name, e.g. Corporation, Partnership."
         data_tests:
           - not_null
