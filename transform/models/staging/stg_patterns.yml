@@ -1,0 +1,61 @@
+version: 2
+
+models:
+  - name: stg_patterns
+    description: >
+      Typed laundering patterns. One row per transaction that belongs to a known laundering attempt.
+      Used as ground truth when evaluating detection rules.
+    columns:
+      - name: attempt_id
+        description: "Sequential ID of the laundering attempt (one block in the source file)."
+        data_tests:
+          - not_null
+      - name: pattern_type
+        description: "Laundering pattern of the attempt, as labelled by the IBM data generator."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - FAN-OUT
+                  - FAN-IN
+                  - CYCLE
+                  - GATHER-SCATTER
+                  - SCATTER-GATHER
+                  - STACK
+                  - RANDOM
+                  - BIPARTITE
+      - name: pattern_detail
+        description: "Extra detail from the block header, e.g. 'Max 16-degree Fan-Out'. NULL when missing."
+      - name: transaction_at
+        description: "Date and time of the transaction."
+        data_tests:
+          - not_null
+      - name: amount_paid
+        description: "Amount paid, in payment_currency."
+        data_tests:
+          - not_null
+      - name: is_laundering
+        description: "Always true, since the file only contains laundering attempts."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true]
+                quote: false
+      - name: from_account_key
+        description: "Key of the sending account. Joins to stg_accounts.account_key."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_accounts')
+                field: account_key
+      - name: to_account_key
+        description: "Key of the receiving account. Joins to stg_accounts.account_key."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_accounts')
+                field: account_key
